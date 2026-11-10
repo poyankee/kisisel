@@ -13,3 +13,13 @@ describe('format', () => {
     expect(tamAd({ ad: 'Elif' })).toBe('Elif')
   })
 })
+
+import { gunEkle, haftaBasi, tarihTR } from './format'
+describe('tarih yardımcıları', () => {
+  it('haftayı pazartesiden başlatır', () => {
+    expect(haftaBasi('2026-11-10')).toBe('2026-11-09') // salı → pazartesi
+    expect(haftaBasi('2026-11-15')).toBe('2026-11-09') // pazar → önceki pazartesi
+    expect(gunEkle('2026-12-31', 1)).toBe('2027-01-01')
+    expect(tarihTR('2026-11-10')).toBe('10.11.2026')
+  })
+})

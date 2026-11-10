@@ -4,8 +4,10 @@ import { defineConfig } from 'vitest/config'
 import { VitePWA } from 'vite-plugin-pwa'
 import pkg from './package.json' with { type: 'json' }
 
-// GitHub Pages gibi alt klasörde yayınlanırken BASE_PATH=/kisisel/ verilir.
-const base = process.env.BASE_PATH ?? '/'
+// Android (Capacitor) derlemesi: CAPACITOR=1 → göreli yollar, service worker yok.
+// Web'de alt klasörde yayınlanırken BASE_PATH=/kisisel/ verilebilir.
+const native = process.env.CAPACITOR === '1'
+const base = native ? './' : (process.env.BASE_PATH ?? '/')
 
 export default defineConfig({
   base,
@@ -16,6 +18,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
+      disable: native,
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {

@@ -1,0 +1,71 @@
+name: Android APK
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write # "son-surum" yayınına APK eklemek için
+
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:android
+
+      # İsteğe bağlı sabit imza anahtarı (Settings → Secrets and variables → Actions).
+      # Tanımlı değilse debug imzası kullanılır; bu durumda her yeni APK için eski uygulamayı
+      # kaldırmak gerekebilir. Ayrıntı: README.md
+      - name: İmza anahtarını hazırla
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/derstakip.keystore"
+          echo "KEYSTORE_PATH=$RUNNER_TEMP/derstakip.keystore" >> "$GITHUB_ENV"
+
+      - name: APK derle
+        working-directory: android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/DersTakip.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DersTakip-apk
+          path: DersTakip.apk
+
+      # Telefondan kolay indirmek için: her derlemede "son-surum" yayınındaki APK güncellenir
+      - name: Son sürüm yayınını güncelle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOT="Dal: ${GITHUB_REF_NAME} · Derleme: ${GITHUB_RUN_NUMBER} · ${GITHUB_SHA::7}"
+          if gh release view son-surum >/dev/null 2>&1; then
+            gh release upload son-surum DersTakip.apk --clobber
+            gh release edit son-surum --notes "$NOT"
+          else
+            gh release create son-surum DersTakip.apk --prerelease --title "Ders Takip — son sürüm" --notes "$NOT"
+          fi

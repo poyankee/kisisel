@@ -191,7 +191,8 @@ Faiz hesabı yok. Her ay ekstre ya da bakiye girme zorunluluğu yok.
 
 - [x] Öğrenci, sınıf ve kurum kartları (ekle, düzenle, arşivle)
 - [ ] **Takvim:** Gün / 3 Gün / Hafta / Ajanda görünümleri, tekrarlayan özel dersler, tek seferlik iptal ve erteleme
-- [ ] **Kurum programı içe aktarma:** Ayrıştırıcı, kod eşleştirme, önizleme, mükerrer önleme, test dosyası
+  - [x] Haftalık ajanda görünümü (telefonda liste, tablette 7 sütun), derse dokununca detay ve iptal
+- [x] **Kurum programı içe aktarma:** Ayrıştırıcı, kod eşleştirme, önizleme, mükerrer önleme, test dosyası, geri alma
 - [ ] **Bugün ekranı:** Günün dersleri ve her kartta son ders özeti ile "bugün yapılacak" notu
 - [ ] **Hızlı ders kaydı:** İşlenen konu, not, ödev, sonraki derste yapılacak, durum
 - [ ] **Öğrenci / sınıf detay sayfası:** Üst kutu ve ders geçmişi
@@ -356,14 +357,14 @@ KisiselOdemeDonem id, kisisel_odeme_id, donem ("2026-11"), aralik_baslangic, son
 | Arayüz | React + TypeScript + Vite | Claude Code'un en rahat çalıştığı alan |
 | Stil | Tailwind CSS | Mobil öncelikli tasarım |
 | Takvim | FullCalendar (ücretsiz sürüm) + rrule | Google Takvim benzeri görünümler, tekrar kuralları, Türkçe dil desteği |
-| Kurulum | PWA ("Ana ekrana ekle") | Telefon ve tablette aynı uygulama, mağaza gerekmez |
+| Kurulum | Android APK (Capacitor) | Mağaza gerekmez, GitHub'dan indirilip kurulur |
 | Veri | Supabase (Postgres, giriş, dosya depolama) | Telefon ve tablet senkron, veriler güvende |
 | Bildirim | Web Push + Supabase zamanlanmış fonksiyonlar | Ödeme ve ders hatırlatmaları için sunucu tarafında zamanlama gerekir |
 | Yayın | Vercel veya Netlify | Otomatik yayın |
 | Grafik | Recharts | Net gelişimi |
 
 **Notlar**
-- **Uygulama durumu (10.11.2026):** Adım 1 tamam (Vite + React + TS + Tailwind + PWA). Veriler şimdilik cihazda (IndexedDB / Dexie) tutuluyor; Supabase senkronu Adım 2'de aynı veri katmanının arkasına eklenecek. Ayarlar'da JSON yedek al / yükle var.
+- **Uygulama durumu (10.11.2026):** Hedef PWA yerine **Android APK** oldu (Capacitor). APK GitHub Actions'ta derlenip "son-surum" yayınına konuyor. Veriler cihazda (IndexedDB / Dexie); senkron gerekirse sonra aynı veri katmanının arkasına eklenir. Ayarlar'da JSON yedek al / yükle var.
 - Bildirimler artık Faz 2'de (ödeme hatırlatmaları önemli). iPhone ya da iPad'de web bildirimleri için uygulamanın ana ekrana eklenmiş olması gerekir.
 - Ücretsiz planların güncel limitleri (Supabase, Vercel) kurulum sırasında kontrol edilmeli.
 

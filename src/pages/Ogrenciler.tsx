@@ -124,7 +124,7 @@ export function Ogrenciler() {
 
       <EkleButonu onClick={() => setMenuAcik(true)} />
       {menuAcik && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/30 md:items-center" onClick={() => setMenuAcik(false)}>
+        <div data-kapat className="fixed inset-0 z-40 flex items-end justify-center bg-black/30 md:items-center" onClick={() => setMenuAcik(false)}>
           <div className="pb-safe w-full max-w-md rounded-t-3xl bg-white p-4 md:rounded-3xl dark:bg-slate-900" onClick={(e) => e.stopPropagation()}>
             <p className="mb-3 px-1 font-semibold">Ne eklemek istersin?</p>
             <div className="grid gap-2">

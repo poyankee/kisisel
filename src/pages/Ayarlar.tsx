@@ -5,6 +5,7 @@ import { db, kaliciDepolamaIste, yedekAl, yedekYukle } from '../db'
 import { Ikon } from '../components/Ikon'
 import { Nokta, Sayfa } from '../components/ui'
 import { bugunISO } from '../lib/format'
+import { dosyaPaylas, yerelUygulama } from '../lib/native'
 
 export function Ayarlar() {
   const kurumlar = useLiveQuery(() => db.kurumlar.orderBy('ad').toArray())
@@ -17,15 +18,13 @@ export function Ayarlar() {
   }, [])
 
   async function disaAktar() {
-    const json = await yedekAl()
-    const blob = new Blob([json], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `ders-takip-yedek-${bugunISO()}.json`
-    a.click()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
-    setMesaj('Yedek indirildi.')
+    try {
+      await dosyaPaylas(`ders-takip-yedek-${bugunISO()}.json`, await yedekAl())
+      setMesaj(yerelUygulama() ? '' : 'Yedek indirildi.')
+    } catch (e) {
+      // Paylaşım penceresi kapatılınca da hata gelir; sessiz geç
+      if (!/cancel/i.test(String(e))) setMesaj(`Yedek alınamadı: ${(e as Error).message}`)
+    }
   }
 
   async function iceAktar(dosya: File) {
@@ -63,8 +62,7 @@ export function Ayarlar() {
         <h2 className="mb-2 text-sm font-semibold text-slate-500 uppercase dark:text-slate-400">Veriler ve yedek</h2>
         <div className="kart space-y-3 p-4 text-sm">
           <p className="text-slate-600 dark:text-slate-300">
-            Veriler şimdilik <b>bu cihazda</b> saklanıyor. Telefon ve tablet arası senkron (Supabase) sonraki adımda eklenecek.
-            O zamana kadar düzenli yedek almanı öneririm.
+            Veriler şimdilik <b>bu cihazda</b> saklanıyor. Uygulama silinirse veriler de silinir; düzenli yedek alıp Drive'a ya da kendine göndermeni öneririm.
           </p>
           <p>
             Kalıcı depolama:{' '}
@@ -95,14 +93,14 @@ export function Ayarlar() {
         </div>
       </section>
 
-      <section>
+      {!yerelUygulama() && <section>
         <h2 className="mb-2 text-sm font-semibold text-slate-500 uppercase dark:text-slate-400">Uygulamayı kur</h2>
         <div className="kart space-y-2 p-4 text-sm text-slate-600 dark:text-slate-300">
           <p><b>iPhone / iPad (Safari):</b> Paylaş <span aria-hidden>⎋</span> → <b>Ana Ekrana Ekle</b></p>
           <p><b>Android (Chrome):</b> ⋮ menü → <b>Uygulamayı yükle</b> ya da <b>Ana ekrana ekle</b></p>
           <p>Kurulduktan sonra internet olmadan da açılır.</p>
         </div>
-      </section>
+      </section>}
 
       <p className="pb-4 text-center text-xs text-slate-400">Ders Takip · sürüm {__APP_VERSION__}</p>
     </Sayfa>

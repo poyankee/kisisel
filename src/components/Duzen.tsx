@@ -25,7 +25,7 @@ export function Duzen() {
         <div className="h-4" />
       </nav>
 
-      <div className="flex-1 overflow-y-auto pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-6">
+      <div className="flex-1 overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
         <Outlet />
       </div>
 

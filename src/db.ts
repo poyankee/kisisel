@@ -95,6 +95,35 @@ export interface Odev extends Kayit {
   kontrolNotu?: string
 }
 
+/** Kurum programından içe aktarılan tek bir hücre (ders saati). */
+export interface DersSaati extends Kayit {
+  etkinlikId: string
+  kurumId: string
+  kod: string
+  tarih: string // "2026-11-10"
+  baslangic: string // "09:20"
+  bitis: string
+  anahtar: string // kurumId|kod|tarih|baslangic (benzersiz)
+  iceAktarmaId: string
+}
+
+export interface IceAktarma extends Kayit {
+  kurumId: string
+  dosyaAdi: string
+  zaman: string
+  eklenenOturum: number
+  eklenenDersSaati: number
+  iptalEdilen: number
+  atlanan: number
+  geriAlindi: boolean
+  /** Geri alma için: bu yüklemede oluşturulan etkinlikler */
+  olusturulanEtkinlikler: string[]
+  /** Geri alma için: bu yüklemede iptal edilen etkinlikler ve silinen ders saatleri */
+  iptalEdilenEtkinlikler: string[]
+  silinenDersSaatleri: DersSaati[]
+  hamDosya?: string
+}
+
 class DersTakipDB extends Dexie {
   kurumlar!: EntityTable<Kurum, 'id'>
   kurumKodlari!: EntityTable<KurumKodu, 'id'>
@@ -103,6 +132,8 @@ class DersTakipDB extends Dexie {
   etkinlikler!: EntityTable<Etkinlik, 'id'>
   dersler!: EntityTable<DersKaydi, 'id'>
   odevler!: EntityTable<Odev, 'id'>
+  dersSaatleri!: EntityTable<DersSaati, 'id'>
+  iceAktarmalar!: EntityTable<IceAktarma, 'id'>
 
   constructor() {
     super('ders-takip')
@@ -114,6 +145,10 @@ class DersTakipDB extends Dexie {
       etkinlikler: 'id, tur, baslangic, [hedefTip+hedefId], iceAktarmaId',
       dersler: 'id, etkinlikId, tarih, [hedefTip+hedefId]',
       odevler: 'id, dersId, durum, [hedefTip+hedefId]',
+    })
+    this.version(2).stores({
+      dersSaatleri: 'id, etkinlikId, &anahtar, [kurumId+tarih], iceAktarmaId',
+      iceAktarmalar: 'id, kurumId, zaman',
     })
   }
 }
@@ -128,9 +163,11 @@ export const TABLOLAR = [
   'etkinlikler',
   'dersler',
   'odevler',
+  'dersSaatleri',
+  'iceAktarmalar',
 ] as const
 
-function yeniId(): string {
+export function yeniId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
   // Eski tarayıcılar ve http (güvensiz bağlam) için yedek
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
