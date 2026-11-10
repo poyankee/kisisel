@@ -24,7 +24,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: android-actions/setup-android@v3
+      # ubuntu-latest'te Android SDK hazır kurulu (ANDROID_HOME); eksik platformları Gradle indirir
 
       - run: npm ci
       - run: npm test
